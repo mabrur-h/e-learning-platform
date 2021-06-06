@@ -1,0 +1,23 @@
+{
+  "name": "mayoqhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/server/server.js",
+    "start": "forever src/server/server.js",
+    "restart": "forever restart src/server/server.js",
+    "stop": "forever stop src/server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mabrur-h/e-learning-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mabrur-h/e-learning-platform/issues"
+  },
+  "homepage": "https://github.com/mabrur-h/e-learning-platform#readme"
+}
