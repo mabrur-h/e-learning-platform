@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import postgres from './modules/pg.js';
+import routes from './routes/routes.js';
 
 async function main () {
     let __dirname = path.resolve(path.dirname(''));
@@ -25,10 +26,14 @@ async function main () {
     app.use(limiter);
     app.use(helmet());
     app.use(morgan('dev'));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
     app.use(async (req, res, next) => {
         req.postgres = db;
         next();
     });
+
+    routes(app);
 }
 
 main().then();

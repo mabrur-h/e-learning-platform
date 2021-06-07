@@ -12,8 +12,8 @@ async function postgres() {
         let db = {};
         db.users = await UserModel(Sequelize, sequelize);
 
-        return db;
         // await sequelize.sync({ force: true });
+        return db;
     } catch (e) {
         console.log("DB-ERROR:", e);
     }
