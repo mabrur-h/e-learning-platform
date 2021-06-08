@@ -33,6 +33,11 @@ export default async (Sequelize, sequelize) => {
             type: Sequelize.DataTypes.ENUM,
             values: ["male", "female"],
             allowNull: false
+        },
+        user_attempts: {
+            type: Sequelize.DataTypes.SMALLINT,
+            allowNull: false,
+            defaultValue: 0
         }
     })
 }
