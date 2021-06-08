@@ -2,6 +2,7 @@ import phoneValidation from "../validations/phoneValidation.js";
 import signUpValidation from "../validations/signUpValidation.js";
 import codeValidation from "../validations/codeValidation.js";
 import editProfileValidation from "../validations/editProfileValidation.js";
+import editPhotoValidation from "../validations/editPhotoValidation.js";
 import rn from 'random-number';
 import sendSms from '../modules/sms.js'
 import JWT from '../modules/jwt.js'
@@ -260,6 +261,12 @@ class UserController {
             const user = await req.postgres.users.findOne({
                 where: {
                     user_id: req.user
+                },
+                include: {
+                    model: req.postgres.userPhotos,
+                    include: {
+                        model: req.postgres.files
+                    }
                 }
             })
 
@@ -269,6 +276,35 @@ class UserController {
             })
         } catch (e) {
             res.status(500).json({
+                ok: false,
+                message: e + ''
+            })
+        }
+    }
+    static async editPhoto(req, res) {
+        try {
+            const data = await editPhotoValidation.validateAsync(req.body);
+
+            await req.postgres.userPhotos.destroy({
+                where: {
+                    user_id: req.user
+                }
+            })
+
+            const photo = await req.postgres.userPhotos.create({
+                file_id: data.file_id,
+                user_id: req.user
+            })
+
+            console.log(photo);
+
+            await res.status(202).json({
+                ok: true,
+                message: "Profile photo successfully updated!"
+            })
+
+        } catch (e) {
+            res.status(400).json({
                 ok: false,
                 message: e + ''
             })

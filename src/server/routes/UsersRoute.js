@@ -11,6 +11,7 @@ router.post('/signup', UserController.signUp)
 router.post('/login', UserController.login)
 router.post('/validate-code', UserController.validateCode)
 router.post('/edit', AuthMiddleware, UserController.editPersonalData)
+router.post('/editPhoto', AuthMiddleware, UserController.editPhoto)
 
 export default {
     router,
