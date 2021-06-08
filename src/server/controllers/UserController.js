@@ -3,6 +3,7 @@ import signUpValidation from "../validations/signUpValidation.js";
 import codeValidation from "../validations/codeValidation.js";
 import rn from 'random-number';
 import sendSms from '../modules/sms.js'
+import JWT from '../modules/jwt.js'
 import pkg from 'sequelize';
 import moment from "moment";
 
@@ -65,7 +66,7 @@ class UserController {
 
             if (!user) throw new Error("User not found!");
 
-            const ban = await req.postgres.ban_model.findOne({
+            const ban = await req.postgres.bans.findOne({
                 where: {
                     user_id: user.dataValues.user_id,
                     expireDate: {
@@ -161,7 +162,7 @@ class UserController {
                             }
                         })
 
-                        await req.postgres.ban_model.create({
+                        await req.postgres.bans.create({
                             user_id: attempt.dataValues.user_id,
                             expireDate: new Date(Date.now() + 7200000)
                         })
@@ -169,6 +170,50 @@ class UserController {
                 }
                 throw new Error("Your validation code is incorrect!")
             }
+
+            await req.postgres.sessions.destroy({
+                where: {
+                    user_id: attempt.dataValues.user_id
+                }
+            })
+
+            let userAgent = req.headers["user-agent"];
+            let ipAddress = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+            if (!(userAgent && ipAddress)) throw new Error("Invalid device!")
+
+            const session = await req.postgres.sessions.create({
+                user_id: attempt.dataValues.user_id,
+                ip_address: ipAddress,
+                user_agent: userAgent
+            })
+
+            const token = JWT.generateToken({
+                id: session.dataValues.id
+            })
+
+            await req.postgres.attempts.destroy({
+                where: {
+                    user_id: attempt.dataValues.user_id
+                }
+            })
+
+            await req.postgres.attempts.update({
+                user_attempts: 0
+            }, {
+                where: {
+                    user_id: attempt.dataValues.user_id
+                }
+            })
+
+            res.status(201).json({
+                ok: true,
+                message: "Logged in!",
+                data: {
+                    token
+                }
+            })
+
         } catch (e) {
             res.status(401).json({
                 ok: false,
