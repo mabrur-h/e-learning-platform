@@ -1,6 +1,7 @@
 import phoneValidation from "../validations/phoneValidation.js";
 import signUpValidation from "../validations/signUpValidation.js";
 import codeValidation from "../validations/codeValidation.js";
+import editProfileValidation from "../validations/editProfileValidation.js";
 import rn from 'random-number';
 import sendSms from '../modules/sms.js'
 import JWT from '../modules/jwt.js'
@@ -224,7 +225,55 @@ class UserController {
                 message: e + ''
             })
         }
-    } 
+    }
+    static async editPersonalData(req, res) {
+        try {
+            const data = await editProfileValidation.validateAsync(req.body);
+            console.log(data);
+
+            const info = {
+                ...data,
+                gender: data.gender == 2 ? 'male' : 'female'
+            }
+
+            await req.postgres.users.update(info, {
+                where: {
+                    user_id: req.user
+                }
+            })
+
+            await res.status(202).json({
+                ok: true,
+                message: "Profile successfully edited!",
+                data: info
+            })
+
+        } catch (e) {
+            res.status(400).json({
+                ok: false,
+                message: e + ''
+            })
+        }
+    }
+    static async getData(req, res) {
+        try {
+            const user = await req.postgres.users.findOne({
+                where: {
+                    user_id: req.user
+                }
+            })
+
+            await res.status(200).json({
+                ok: true,
+                data: user.dataValues
+            })
+        } catch (e) {
+            res.status(500).json({
+                ok: false,
+                message: e + ''
+            })
+        }
+    }
 }
 
 export default UserController;
